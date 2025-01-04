@@ -5,5 +5,3 @@ repository:
   description: This component is responsible for provisioning IPAM per region in a centralized account
   homepage: https://cloudposse.com/accelerate
   topics: terraform, terraform-component
-
-
