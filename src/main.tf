@@ -40,7 +40,7 @@ data "aws_region" "current" {
 
 module "ipam" {
   source  = "aws-ia/ipam/aws"
-  version = "1.2.1"
+  version = "2.1.2"
 
   count = local.enabled ? 1 : 0
 
