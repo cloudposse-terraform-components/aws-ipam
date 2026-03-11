@@ -4,7 +4,7 @@ locals {
   pool_configurations = {
     for pool, poolval in var.pool_configurations :
     pool => merge(poolval, {
-      locale = lookup(poolval, "locale", join("", data.aws_region.current.*.name))
+      locale = lookup(poolval, "locale", join("", data.aws_region.current[*].name))
       sub_pools = {
         for subpool, subval in poolval.sub_pools :
         subpool => merge(subval, {
@@ -16,7 +16,7 @@ locals {
                   for account in lookup(subval, "ram_share_accounts", []) :
                   module.account_map.outputs.full_account_map[account]
                 ],
-                [join("", data.aws_caller_identity.current.*.account_id)]
+                [join("", data.aws_caller_identity.current[*].account_id)]
               )
             )
           )
