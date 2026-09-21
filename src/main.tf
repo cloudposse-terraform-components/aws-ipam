@@ -46,6 +46,7 @@ module "ipam" {
 
   create_ipam = local.enabled
 
+  additional_operating_regions   = var.additional_operating_regions
   address_family                 = var.address_family
   ipam_scope_id                  = var.ipam_scope_id
   ipam_scope_type                = var.ipam_scope_type
