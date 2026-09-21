@@ -116,3 +116,18 @@ variable "ipam_scope_type" {
     error_message = "Scope type must be either public or private."
   }
 }
+
+variable "additional_operating_regions" {
+  type        = list(string)
+  description = <<-EOT
+    Additional AWS Regions to register as IPAM operating Regions, beyond those already
+    implied by the locales in `var.pool_configurations`.
+
+    A pool's locale must already be an operating Region of the IPAM, so a Region has to be
+    registered before the first pool using it can be created. This is required when the
+    pools for a new Region are managed by a separate component instance that binds the same
+    IPAM with `create_ipam = false` — that instance's locales never reach the `aws_vpc_ipam`
+    resource, so the Region would otherwise never be registered.
+  EOT
+  default     = []
+}
