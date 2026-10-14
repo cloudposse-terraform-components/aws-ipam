@@ -31,11 +31,11 @@ data "aws_caller_identity" "current" {
   count = local.enabled ? 1 : 0
 }
 
-# Swap to the `1.x` registry version once CloudPosse cuts the release:
-#   source  = "cloudposse/ipam/aws"
-#   version = "1.x.x"
+# Pinned to the v0.1.0 release tag via git: the module is not published on the
+# Terraform Registry yet. Swap to `source = "cloudposse/ipam/aws"` +
+# `version = "0.1.0"` once it is.
 module "ipam" {
-  source = "git::https://github.com/cloudposse/terraform-aws-ipam.git?ref=696edd05294f7d28256492d622ac316070cf04d6"
+  source = "git::https://github.com/cloudposse/terraform-aws-ipam.git?ref=v0.1.0"
 
   create_ipam            = var.create_ipam
   existing_ipam_id       = var.existing_ipam_id
@@ -70,7 +70,7 @@ module "ipam" {
 # organization. It is intentionally a separate submodule; enable it only in a
 # stack that targets the management account.
 module "ipam_organization_admin" {
-  source = "git::https://github.com/cloudposse/terraform-aws-ipam.git//modules/organization-admin?ref=696edd05294f7d28256492d622ac316070cf04d6"
+  source = "git::https://github.com/cloudposse/terraform-aws-ipam.git//modules/organization-admin?ref=v0.1.0"
 
   enabled = local.enabled && var.organization_admin_enabled
 
