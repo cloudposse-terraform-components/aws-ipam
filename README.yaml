@@ -7,6 +7,18 @@ description: |-
 usage: |-
   **Stack Level**: Regional
 
+  This component wraps the [`cloudposse/terraform-aws-ipam`](https://github.com/cloudposse/terraform-aws-ipam)
+  module, which takes IPAM pools as a **flat `pools` map** keyed by your own name
+  for each pool. Hierarchy is expressed by a pool naming another entry as its
+  `parent` (rather than the old nested `pool_configurations` / `sub_pools`). Pool
+  nesting is capped at a depth of 4.
+
+  Provisioned CIDRs go under a pool's `cidrs`, manual reservations under
+  `allocations`, and RAM sharing under `ram_share`. As a convenience, an entry in
+  `ram_share.principals` that matches an `account-map` account name is resolved to
+  that account's ID; literal account IDs and ARNs pass through, and the current
+  account is dropped (RAM cannot share a resource with its own owner).
+
   Here's an example snippet for how to use this component.
 
   ```yaml
@@ -15,37 +27,47 @@ usage: |-
       ipam:
         vars:
           enabled: true
-          top_cidr: [10.96.0.0/11]
-          pool_configurations:
+          pools:
             core:
-              cidr: [10.96.0.0/12]
+              cidrs:
+                primary:
+                  cidr: 10.96.0.0/12
+            core-network:
+              parent: core
               locale: us-east-2
-              sub_pools:
-                network:
-                  cidr: [10.96.0.0/16]
-                  ram_share_accounts: [core-network]
-                auto:
-                  cidr: [10.97.0.0/16]
-                  ram_share_accounts: [core-auto]
-                corp:
-                  cidr: [10.98.0.0/16]
-                  ram_share_accounts: [core-corp]
+              cidrs:
+                primary:
+                  cidr: 10.96.0.0/16
+              ram_share:
+                principals: [core-network]
+            core-auto:
+              parent: core
+              locale: us-east-2
+              cidrs:
+                primary:
+                  cidr: 10.97.0.0/16
+              ram_share:
+                principals: [core-auto]
             plat:
-              cidr: [10.112.0.0/12]
+              cidrs:
+                primary:
+                  cidr: 10.112.0.0/12
+            plat-dev:
+              parent: plat
               locale: us-east-2
-              sub_pools:
-                dev:
-                  cidr: [10.112.0.0/16]
-                  ram_share_accounts: [plat-dev]
-                staging:
-                  cidr: [10.113.0.0/16]
-                  ram_share_accounts: [plat-staging]
-                prod:
-                  cidr: [10.114.0.0/16]
-                  ram_share_accounts: [plat-prod]
-                sandbox:
-                  cidr: [10.115.0.0/16]
-                  ram_share_accounts: [plat-sandbox]
+              cidrs:
+                primary:
+                  cidr: 10.112.0.0/16
+              ram_share:
+                principals: [plat-dev]
+            plat-prod:
+              parent: plat
+              locale: us-east-2
+              cidrs:
+                primary:
+                  cidr: 10.114.0.0/16
+              ram_share:
+                principals: [plat-prod]
   ```
 
   <!-- prettier-ignore-start -->
