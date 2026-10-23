@@ -3,6 +3,8 @@ package test
 import (
 	"context"
 	"encoding/json"
+	"os"
+	"os/exec"
 	"strings"
 	"testing"
 
@@ -15,14 +17,33 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// regionEnvVar is read by the basic usecase fixture to place the IPAM.
+const regionEnvVar = "IPAM_TEST_REGION"
+
 type ComponentSuite struct {
 	helper.TestSuite
+}
+
+// testRegion picks the Region the IPAM is deployed to. An account can hold only
+// one IPAM per Region, and CI runs the terraform and opentofu jobs in parallel
+// against the same account, so each binary gets its own Region. An explicit
+// IPAM_TEST_REGION wins.
+func testRegion(t *testing.T) string {
+	if region := os.Getenv(regionEnvVar); region != "" {
+		return region
+	}
+	out, err := exec.Command("terraform", "version").Output()
+	require.NoError(t, err, "running `terraform version` to detect the binary")
+	if strings.Contains(string(out), "OpenTofu") {
+		return "us-east-1"
+	}
+	return "us-east-2"
 }
 
 func (s *ComponentSuite) TestBasic() {
 	const component = "ipam/basic"
 	const stack = "default-test"
-	const awsRegion = "us-east-2"
+	awsRegion := os.Getenv(regionEnvVar)
 
 	defer s.DestroyAtmosComponent(s.T(), component, stack, nil)
 	options, _ := s.DeployAtmosComponent(s.T(), component, stack, nil)
@@ -106,6 +127,7 @@ func (s *ComponentSuite) TestEnabledFlag() {
 }
 
 func TestRunSuite(t *testing.T) {
+	t.Setenv(regionEnvVar, testRegion(t))
 	suite := new(ComponentSuite)
 	helper.Run(t, suite)
 }
