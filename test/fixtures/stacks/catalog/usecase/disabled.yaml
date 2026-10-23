@@ -1,0 +1,14 @@
+components:
+  terraform:
+    ipam/disabled:
+      metadata:
+        component: target
+      vars:
+        enabled: false
+        operating_regions:
+          - us-east-2
+        pools:
+          top:
+            cidrs:
+              primary:
+                cidr: "10.251.0.0/16"

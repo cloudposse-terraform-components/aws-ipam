@@ -1,0 +1,28 @@
+components:
+  terraform:
+    ipam/basic:
+      metadata:
+        component: target
+      vars:
+        enabled: true
+        # Private pools need the advanced tier; the free tier only covers public
+        # IPv4 insights and BYOIP.
+        ipam_tier: advanced
+        operating_regions:
+          - us-east-2
+        # One top-level pool holding a supernet, and one regional child pool
+        # carved from it with an explicit CIDR.
+        pools:
+          top:
+            description: "Top-level pool"
+            cidrs:
+              primary:
+                cidr: "10.250.0.0/16"
+          regional:
+            parent: top
+            locale: us-east-2
+            description: "Regional pool"
+            allocation_default_netmask_length: 24
+            cidrs:
+              primary:
+                cidr: "10.250.16.0/20"
