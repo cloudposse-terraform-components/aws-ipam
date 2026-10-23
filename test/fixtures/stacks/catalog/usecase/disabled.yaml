@@ -5,9 +5,7 @@ components:
         component: target
       vars:
         enabled: false
-        # account-map lives in the test stack ({tenant}-{stage} = default-test),
-        # not the component's default "root" stage.
-        account_map_stage_name: test
+        account_map_tenant_name: core
         operating_regions:
           - us-east-2
         pools:
