@@ -1,0 +1,33 @@
+components:
+  terraform:
+    ipam/basic:
+      metadata:
+        component: target
+      vars:
+        enabled: true
+        account_map_tenant_name: core
+        # An account holds one IPAM per Region, and the terraform and opentofu
+        # test jobs run in parallel in the same account, so each job deploys to
+        # its own Region (set by the test from the detected binary).
+        region: '{{ getenv "IPAM_TEST_REGION" | default "us-east-2" }}'
+        # Private pools need the advanced tier; the free tier only covers public
+        # IPv4 insights and BYOIP.
+        ipam_tier: advanced
+        operating_regions:
+          - '{{ getenv "IPAM_TEST_REGION" | default "us-east-2" }}'
+        # One top-level pool holding a supernet, and one regional child pool
+        # carved from it with an explicit CIDR.
+        pools:
+          top:
+            description: "Top-level pool"
+            cidrs:
+              primary:
+                cidr: "10.250.0.0/16"
+          regional:
+            parent: top
+            locale: '{{ getenv "IPAM_TEST_REGION" | default "us-east-2" }}'
+            description: "Regional pool"
+            allocation_default_netmask_length: 24
+            cidrs:
+              primary:
+                cidr: "10.250.16.0/20"
